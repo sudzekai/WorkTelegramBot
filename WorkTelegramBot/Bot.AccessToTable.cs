@@ -1,5 +1,4 @@
 ﻿using OfficeOpenXml;
-using Telegram.Bot.Types;
 
 namespace WorkTelegramBot
 {
@@ -53,7 +52,7 @@ namespace WorkTelegramBot
 
                     return "Смена открыта";
                 }
-                return "Неверно введены данные";
+                return "Неверное название парка";
             }
 
             else if (message.Contains("закрытие", StringComparison.OrdinalIgnoreCase))
@@ -97,9 +96,33 @@ namespace WorkTelegramBot
                     }
                     return "Смена закрыта";
                 }
-                return "Неверно введены данные";
+                return "Неверное название парка";
             }
             return "Не указано действие \"Закрытие\" или \"Открытие\"";
+        }
+
+        static string ClearTable()
+        {
+            int[] indexes = [2, 8, 9, 3, 7, 5, 11, 12];
+            var fileInfo = new FileInfo("file.xlsx");
+            using (var package = new ExcelPackage(fileInfo))
+            {
+                var worksheet = package.Workbook.Worksheets[0];
+                for (int j = 0; j < 40; j += 13)
+                {
+                    foreach (var index in indexes)
+                    {
+                        int resindex = index + j;
+                        for (int i = 2; i < 33; i++)
+                        {
+                            worksheet.Cells[resindex, i].Value = null;
+                        }
+                    }
+                }
+                package.Save();
+
+            }
+            return "";
         }
     }
 }

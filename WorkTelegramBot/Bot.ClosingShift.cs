@@ -98,7 +98,7 @@ namespace WorkTelegramBot
                     result.AppendLine($"Наличка: {message.Text}");
                     bot.OnMessage += Bot_OnMessage;
 
-                    await bot.SendMessage(-1002361758193, result.ToString());
+                    await bot.SendMessage(_adminGroupId, result.ToString());
                     await bot.SendMessage(message.Chat.Id, UpdateTable(result.ToString()));
                     await GetStartMessage(message);
                     result = new StringBuilder();

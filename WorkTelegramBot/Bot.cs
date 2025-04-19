@@ -1,4 +1,5 @@
 ﻿using OfficeOpenXml;
+using System.IO;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -8,9 +9,10 @@ namespace WorkTelegramBot
 {
     partial class Bot
     {
-        static string _token = "token";
-        static long _adminId = 0;
-        static long _adminGroupId = -0;
+        static string _token = Constants._token;
+        static long _adminGroupId = Constants._adminGroupId;
+        public const long _adminId = Constants._adminId;
+
 
         static EPPlusLicense license = new();
         private static TelegramBotClient bot;
@@ -20,15 +22,9 @@ namespace WorkTelegramBot
 
         static StringBuilder result = new();
 
-        static string[] parks =
-            [
+        static string[] parks = Constants.parks;
 
-            ];
-
-        static List<string> workers =
-            [
-
-            ];
+        static List<string> workers = Constants.workers;
 
         static void Main(string[] args)
         {
@@ -51,7 +47,7 @@ namespace WorkTelegramBot
 
         private static Task Bot_OnUpdate(Update update)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         private async static Task Bot_OnMessage(Message message, Telegram.Bot.Types.Enums.UpdateType type)
@@ -135,6 +131,17 @@ namespace WorkTelegramBot
                     }
                     break;
 
+                case "/clear":
+                    if (message.Chat.Id == _adminGroupId)
+                    {
+                        await using Stream stream = File.OpenRead("file.xlsx");
+                        await bot.SendDocument(
+                            message.Chat.Id,
+                            document: InputFile.FromStream(stream),
+                            caption: "Таблица очищена\nТаблица перед очищением:");
+                        ClearTable();
+                    }
+                    break;
                 default:
                     break;
             }
@@ -145,10 +152,13 @@ namespace WorkTelegramBot
             await bot.SendMessage(message.Chat.Id, "Это рабочий бот для открытия и закрытия смен проката электромобилей и продажи сахарной ваты и попкорна.\n\nДля работы нажмите на одну из кнопок", replyMarkup: new ReplyKeyboardMarkup().AddButton("Открытие").AddButton("Закрытие").AddNewRow().AddButton("Шаблон"));
         }
 
-        private static Task Bot_OnError(Exception exception, Telegram.Bot.Polling.HandleErrorSource source)
+        private static async Task Bot_OnError(Exception exception, Telegram.Bot.Polling.HandleErrorSource source)
         {
-            Console.WriteLine(exception);
-            return Task.CompletedTask;
+            await using Stream stream = File.OpenRead("file.xlsx");
+            await bot.SendDocument(
+                            _adminId,
+                            document: InputFile.FromStream(stream));
+            await bot.SendMessage(_adminId, $"Ошибка: {exception.Message}\n Полный код оишбки: {exception}");
         }
     }
 }

@@ -14,10 +14,12 @@ namespace WorkTelegramBot
         {
             if (message.From.Id == gettingMessagesFromId)
             {
+                bot.OnMessage -= OnGettingTemplateMessage;
                 bot.OnMessage += Bot_OnMessage;
                 gettingMessagesFromId = 0;
                 await bot.SendMessage(message.Chat.Id, UpdateTable(message.Text));
                 await GetStartMessage(message);
+                await bot.SendMessage(_adminGroupId, result.ToString());
             }
         }
     }
